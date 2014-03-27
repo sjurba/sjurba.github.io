@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+
+	<title>NNUG - Firebase</title>
+
+	<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+	<meta name="author" content="Hakim El Hattab">
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<link rel="stylesheet" href="css/reveal.min.css">
+	<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+	<!-- For syntax highlighting -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<link rel="stylesheet" type="text/css" href="css/custom.css">
+
+	<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+	<script>
+	if( window.location.search.match( /print-pdf/gi ) ) {
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = 'css/print/pdf.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+	}
+	</script>
+	<script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.6/firebase.js'></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+		<script type="text/javascript">
+		function verifyFB() {
+			if (!window.fb) {
+				window.fb = new Firebase("https://webstep-nnug.firebaseio.com/");
+
+			}
+		}
+
+		$.fn.onCodeChange = function(regexp, callback) {
+			return this.each(function(){
+				var el = $(this);
+				function getText() {
+					var text = el.text();
+					var m = text.match(regexp);
+					if (m) {
+						return m;
+					} else {
+						return "";
+					}
+				}
+				var prev = getText();
+				el.blur(function() {
+					var curr = getText();
+					if (curr[0] != prev[0]) {
+						prev = curr;
+						callback.call(el, curr);
+					}
+				});
+				return el;	
+			});
+		}
+		var output;
+		function show(val) {
+			if (!output) {
+				output = $(".fixedOutput");
+				output.click(function(){
+					zoom.to({ element: output[0] });
+				});
+				Reveal.addEventListener( 'slidechanged', function( event ) {
+					output.removeClass("active");
+				});
+			}
+			$("code", output).text(JSON.stringify(val, undefined, 1));
+			output.addClass("active");
+		}
+
+		function turnOffExistingEvent(code) {
+			var match = code.match(/fb(?:.child\("([^"]*)"\))?.on\("([^"]*)"/);
+			if (match) {
+				var child = match[1];
+				var event = match[2];
+				var node = fb;
+				if (child) {
+					node = fb.child(child);
+				}
+				node.off(event);
+			}
+		}
+		</script>
+	</head>
+
+	<body>
+
+		<div class="fixedOutput">
+			<pre><code data-trim></code></pre>
+
+		</div>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<img src="img/firebase.png" alt="Firebase" class="logo">
+					<h3>A powerful API to store and sync data in realtime.</h3>
+					<p>
+						<small>Prensentert av Sjur Bakka</small>
+					</p>
+					<aside class="notes">
+						Notes.
+					</aside>
+				</section>
+
+				<section>
+					<h2><a href="https://www.firebase.com/">https://www.firebase.com/</a></h2>
+					<br/>
+					<h3><a href="https://www.firebase.com/how-it-works.html">https://www.firebase.com/how-it-works.html</a></h3>
+					<h3><a href="https://www.firebase.com/docs/">https://www.firebase.com/docs/</a></h3>
+				</section>
+				<section>
+					<h2>Creating a Firebase</h2>
+					<p>
+						<a id="nav-login" href="https://www.firebase.com/account" target="_blank" class="button button-login">Login</a>
+					</p>
+				</section>
+				<section class="connect">
+					<h2>Connecting to Firebase</h2>
+					<pre><code data-trim contenteditable class="html">
+<script src='https://cdn.firebase.com/js/client/1.0.6/firebase.js'>
+</script>
+					</code></pre>
+					<pre><code data-trim contenteditable class="javascript">
+						var fb = new Firebase("XXX");
+					</code></pre>
+					<p class="output"></p>
+					<script type="text/javascript">
+					$(function($){
+						var section = $(".connect");
+						$('code', section).onCodeChange(/Firebase\("(.*)"\)/, function(match) {
+							var url = match[1];
+							try  {
+								window.fb = new Firebase(url);
+								$(".output", section).html("Connected to: " + url);
+							} catch(e) {
+								$(".output", section).html("Error: " + e.message);
+
+							} 
+						});
+					});
+					</script>
+				</section>
+
+				<section class="setData">
+					<script type="text/javascript">
+					$(function($){
+						var section = $(".setData");
+						$("code", section).onCodeChange(/[\s\S]*/m, function(match) {
+							var code = $(this);
+							var val = match[0]
+							try  {
+								verifyFB();
+								var oncomplete = function (err) {
+									if (err) {
+										code.parent().next(".output").html("Error: " + err.message);
+									} else {
+										code.parent().next(".output").html("Update successful");
+									}
+								}
+								turnOffExistingEvent(val);
+								eval(val);
+
+							} catch(e) {
+								code.parent().next(".output").html("Error: " + e.message);
+								console.log(match);
+
+							} 
+						});
+					});
+					</script>
+
+					<section>
+						<h2>Create some data.</h2>
+						<pre><code data-trim contenteditable class="javascript">
+							fb.set({ "name": "XXX" }, oncomplete);
+						</code></pre>
+						<p class="output"></p>
+					</section>
+
+					<section>
+						<h2>Create more data.</h2>
+						<pre><code data-trim contenteditable class="javascript">
+							fb.set({"people": [{"name" : "XXX"}, {"name" : "XXX"}]}, oncomplete);
+						</code></pre>
+						<p class="output"></p>
+					</section>
+
+					<section>
+						<h2>Deleting data.</h2>
+						<pre><code data-trim contenteditable class="javascript">
+							fb.child("xxx").remove(oncomplete);
+						</code></pre>
+						<p class="output"></p>
+					</section>
+
+					<section>
+						<h2>Pushing data.</h2>
+						<pre><code data-trim contenteditable class="javascript">
+							fb.child("people").push({ "name": "XXX" }, oncomplete);
+						</code></pre>
+						<p class="output"></p>
+					</section>
+
+				</section>
+
+
+
+				<section class="setData">
+
+					<section >
+						<h2>Read the data.</h2>
+						<h3>(And keep it synched..)</h3>
+						<pre><code data-trim contenteditable class="javascript">
+fb.on("value", function(data) {
+	var name = data.val() ? data.val().name : "";
+	
+});
+					</code></pre>
+					<p class="output"></p>
+
+				</section>
+				<section >
+					<h2>Read only new data.</h2>
+					<pre><code data-trim contenteditable class="javascript">
+fb.child("people").on("child_added", function(data) {
+	var name = data.val() ? data.val().name : "";
+	
+});
+				</code></pre>
+				<p class="output"></p>
+
+			</section>
+
+		</section>
+		<section>
+			<section data-state="mapExample">
+				<h1>Collaborative Map</h1>
+				<a href="http://bit.ly/nnug-firebase" target="_blank">http://bit.ly/nnug-firebase</a>
+				<script type="text/javascript"
+				src="https://maps.googleapis.com/maps/api/js?sensor=false">
+				</script>
+				<script type="text/javascript">
+				$(function($){
+					Reveal.addEventListener( 'mapExample', function() {
+						var markers = [];
+						if (!window.map) {
+							verifyFB();
+							var mapOptions = {
+								center: new google.maps.LatLng(63.35628477896923, 10.337944267724666),
+								zoom: 8
+							};
+							window.map = new google.maps.Map($("#map-canvas")[0],
+								mapOptions);
+
+							google.maps.event.addListener(map, 'click', function(e) {
+								fb.child("map").push({"lat": e.latLng.lat(), "lng" : e.latLng.lng()});
+							});
+							fb.child("map").on("child_added", function(data) {
+								var pos = data.val();
+								var marker = new google.maps.Marker({
+									position: new google.maps.LatLng(pos.lat,pos.lng),
+									map: map,
+									title: data.name(),
+									draggable: true
+								});
+								markers.push(marker);
+								google.maps.event.addListener(marker, 'dragend', function(e) {
+									fb.child("map").child(data.name()).set({"lat": e.latLng.lat(), "lng" : e.latLng.lng()});
+								});
+							});
+							fb.child("map").on("child_changed", function(data) {
+								var pos = data.val();
+								for(var i = 0; i < markers.length; i++) {
+									if (markers[i].getTitle() == data.name()) {
+										markers[i].setPosition(new google.maps.LatLng(pos.lat,pos.lng));
+									}
+								}
+							});
+						}
+					});
+});
+</script>
+<div id="map-canvas"/>					
+</section>
+
+<section>
+	<h1>Create map</h1>
+	<pre><code data-trim class="javascript">
+var mapOptions = {
+	center: new google.maps.LatLng(63.35628477, 10.3379442677),
+	zoom: 8
+};
+window.map = new google.maps.Map($("#map-canvas")[0], mapOptions);
+</code></pre>
+	<pre><code data-trim class="html">
+&lt;div id="map-canvas"/&gt;
+	</code></pre>
+</section>
+<section>
+	<h1>Add position to firebase</h1>
+	<pre><code data-trim class="javascript">
+google.maps.event.addListener(map, 'click', function(e) {
+	var lat = e.latLng.lat(), lng = e.latLng.lng();
+	fb.child("map").push({"lat": lat, "lng" : lng});
+});
+</code></pre>
+</section>
+
+<section>
+	<h1>Show marker on map</h1>
+	<pre><code data-trim class="javascript">
+fb.child("map").on("child_added", function(data) {
+	var pos = data.val();
+	var id = data.name();
+	var marker = new google.maps.Marker({
+		position: new google.maps.LatLng(pos.lat,pos.lng),
+		map: map,
+		title: id,
+		draggable: true
+	});
+...
+</code></pre>
+</section>
+
+<section>
+	<h1>When marker dragged</h1>
+	<pre><code data-trim class="javascript">
+	...
+	markers.push(marker);
+	google.maps.event.addListener(marker, 'dragend', function(e) {
+		var lat = e.latLng.lat(), lng = e.latLng.lng();	
+		fb.child("map").child(id).set({"lat": lat, "lng" : lng});
+	});
+});
+
+</code></pre>
+</section>
+
+<section>
+	<h1>When marker changed</h1>
+	<pre><code data-trim class="javascript">
+fb.child("map").on("child_changed", function(data) {
+	var pos = data.val();
+	var id = data.name();
+	for(var i = 0; i < markers.length; i++) {
+		var marker = markers[id];
+		if (marker.getTitle() == id) {
+			var latLng = new google.maps.LatLng(pos.lat,pos.lng);
+			marker.setPosition(latLng);
+		}
+	}	
+});
+</code></pre>
+</section>
+</section>
+
+<section>
+	<section>
+		<h1>Pricing</h1>
+		<img src="pricing.png">
+	</section>
+	<section class="restExample" data-state="rest">
+		<h1>Workaround: REST</h1>
+		<a href="" target="_blank"></a>
+		<script type="text/javascript">
+		$(function($){
+			Reveal.addEventListener( 'rest', function() {
+				verifyFB();
+				var url = fb.toString() + "/.json";
+				console.log(url);
+				$(".restExample a").attr("href", url).text(url);
+			});
+		});
+		</script>
+	</section>
+
+</section>
+
+
+<section>
+	<section>
+		<h1>Security</h1>
+		<ul>
+			<li>Facebook</li>
+			<li>Google</li>
+			<li>Twitter</li>
+		</ul>
+		<ul>
+			<li>Github</li>
+			<li>Persona</li>
+			<li>Email/Password</li>
+		</ul>
+	</section>
+	<section>
+		<h1>Security rules</h1>
+		<pre><code data-trim  class="javascript">
+{
+	"rules": {
+		".read": true,
+		".write": "auth != null"
+	}
+}
+</code></pre>
+</section>
+<section>
+	<h1>Only create new comments</h1>
+	<pre><code data-trim class="javascript">
+{
+	"rules": {
+		".read": true,
+		"$comment": {
+			".write": "auth != null && !data.exists()"
+	&#09;}
+	}
+}
+</code></pre>
+</section>
+</section>
+
+<section>
+	<h1>Clients/libs</h1>
+	<ul>
+		<li>Javascript</li>
+		<li>Angular</li>
+		<li>Ember</li>
+	</ul>
+	<ul>
+		<li>Node.js</li>
+		<li>iOS/OS X</li>
+		<li>Java/Android</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Limitations</h1>
+	<ul>
+		<li>No queries</li>
+		<li>No map/reduce</li>
+	</ul>
+</section>
+
+<section>
+	<h1>Usage</h1>
+	<ul>
+		<li>Real-time web apps</li>
+		<li>No server side code</li>
+		<li>Prototyping</li>
+		<li>Lean/MVP</li>
+		<li>Agile - Delay descision</li>
+	</ul>
+</section>
+
+
+
+<section>
+	<h1>Happy Firebasing</h1>
+	<h3>Sjur Bakka / Webstep AS</h3>
+</section>
+
+</div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+
+		// Full list of configuration options available here:
+		// https://github.com/hakimel/reveal.js#configuration
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			history: true,
+			center: true,
+
+			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+			transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+			// Parallax scrolling
+			// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+			// parallaxBackgroundSize: '2100px 900px',
+
+			// Optional libraries used to extend on reveal.js
+			dependencies: [
+			{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+			{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+			{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+			{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+			{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+			{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+			]
+		});
+
+</script>
+
+</body>
+</html>
