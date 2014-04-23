@@ -1,16 +1,16 @@
 {
   "name": "ProteinTracker",
   "description": "Pluralsight tutorial",
-  "launch_path": "/index.html",
+  "launch_path": "/ProteinTracker/index.html",
   "icons": {
-    "16": "/img/icon-16.png",
-    "48": "/img/icon-48.png",
-    "128": "/img/icon-128.png",
-    "256": "/img/icon-256.png"
+    "16": "/ProteinTracker/img/icon-16.png",
+    "48": "/ProteinTracker/img/icon-48.png",
+    "128": "/ProteinTracker/img/icon-128.png",
+    "256": "/ProteinTracker/img/icon-256.png"
   },
   "developer": {
     "name": "Sjur Bakka",
-    "url": "http://sjurba.github.io"
+    "url": "http://sjurba.github.io/ProteinTracker/"
   },
   "installs_allowed_from" : ["*"],
   "default_locale": "en"
