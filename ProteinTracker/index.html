@@ -19,6 +19,7 @@
 		<header>
 			<menu type="toolbar">
 				<a href="#" id="quickAddButton"><span class="icon icon-add">Add</span></a>
+				<a href="#" id="installButton">Install</a>
 			</menu>
 			<h1>Protein Tracker</h1>
 		</header>
@@ -53,38 +54,58 @@
 		</form>
 	</section>
 	<script type="text/javascript">
-		var total = 0;
-		var goal = 100;
+	var total = 0;
+	var goal = 100;
 
-		$(function(){
-			$("#goal").text(goal);
-			$("#addButton").click(addProtein);
-			$("#quickAddButton").click(function(){
-				$("#action-menu").toggle();
-			});
+	$(function(){
+		$("#goal").text(goal);
+		$("#addButton").click(addProtein);
+		$("#quickAddButton").click(function(){
+			$("#action-menu").toggle();
 		});
-
-		function addProtein(amount)  {
-			addProteinQuick($("#amount").val());
-			
-		}
-
-		function addProteinQuick(amount) {
-			total += parseInt(amount);
-			$("#total").text(total);
-			if (total >= goal) {
-				scheduleBanner();
+		$("#installButton").click(doInstall);
+		var request = window.navigator.mozApps.checkInstalled("http://sjurba.github.io/ProteinTracker/manifest.webapp");
+		request.onsuccess = function() {
+			if(request.result) {
+				$("#installButton").hide();
 			}
-			$("#action-menu").hide();
 		}
 
-		function scheduleBanner() {
-			$("#banner").show();
-			console.log($("#banner"));
-			window.setTimeout(function(){
-				$("#banner").hide();
-			}, 2000);
+
+	});
+
+	function addProtein(amount)  {
+		addProteinQuick($("#amount").val());
+
+	}
+
+	function addProteinQuick(amount) {
+		total += parseInt(amount);
+		$("#total").text(total);
+		if (total >= goal) {
+			scheduleBanner();
 		}
+		$("#action-menu").hide();
+	}
+
+	function scheduleBanner() {
+		$("#banner").show();
+		console.log($("#banner"));
+		window.setTimeout(function(){
+			$("#banner").hide();
+		}, 2000);
+	}
+
+	function doInstall() {
+		var request = window.navigator.mozApps.install("http://sjurba.github.io/ProteinTracker/manifest.webapp");
+		request.onsuccess = function() {
+			alert("Install successful");
+			$("#installButton").hide();
+		}
+		request.onerror = function() {
+			alert("Install failed. " + this.error.name);
+		}
+	}
 
 	</script>
 </body>
