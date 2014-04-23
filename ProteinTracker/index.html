@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Protein Tracker</title>
+	<meta charset="utf-8" />
+	<meta name="viewport"  content="width=device-width, user-scalable=no" />
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/util.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/fonts.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/style/headers.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/style/input_areas.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/style/buttons.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/style/status.css">
+	<link rel="stylesheet" href="Building-Blocks-gh-pages/style/action_menu.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+</head>
+<body>
+	<section role="region">
+		<header>
+			<menu type="toolbar">
+				<a href="#" id="quickAddButton"><span class="icon icon-add">Add</span></a>
+			</menu>
+			<h1>Protein Tracker</h1>
+		</header>
+		<form>
+			<section>
+				<p>Total:&nbsp;<span id="total">0</span></p>
+			</section>
+			<section>
+				<p>Goal:&nbsp;<span id="goal">0</span></p>
+			</section>
+			<section>
+				<p>Amount:
+					<input type="number" id="amount" placeholder="0" required />
+					<button type="reset">Clear</button>
+				</p>
+				<button type="button" id="addButton">Add</button>
+			</section>
+		</form>
+		<section role="status">
+			<div id="banner" hidden>
+				<p>You reached your goal!</p>
+			</div>
+		</section>
+		<form role="dialog" id="action-menu" data-type="action" hidden>
+			<header>Quick Add</header>
+			<menu>
+				<button type="button" onclick="addProteinQuick(10);">Add 10</button>
+				<button type="button" onclick="addProteinQuick(50);">Add 50</button>
+				<button type="button" onclick="addProteinQuick(100);">Add 100</button>
+				<button type="button" onclick="addProteinQuick(0);">Cancel</button>
+			</menu>
+		</form>
+	</section>
+	<script type="text/javascript">
+		var total = 0;
+		var goal = 100;
+
+		$(function(){
+			$("#goal").text(goal);
+			$("#addButton").click(addProtein);
+			$("#quickAddButton").click(function(){
+				$("#action-menu").toggle();
+			});
+		});
+
+		function addProtein(amount)  {
+			addProteinQuick($("#amount").val());
+			
+		}
+
+		function addProteinQuick(amount) {
+			total += parseInt(amount);
+			$("#total").text(total);
+			if (total >= goal) {
+				scheduleBanner();
+			}
+			$("#action-menu").hide();
+		}
+
+		function scheduleBanner() {
+			$("#banner").show();
+			console.log($("#banner"));
+			window.setTimeout(function(){
+				$("#banner").hide();
+			}, 2000);
+		}
+
+	</script>
+</body>
+</html>
